@@ -71,6 +71,7 @@ fn react(bot Bot, update Update, props Props, mut user_props map[string]UserProp
 		bot.send_message(chat_id: id, text: props.welcome_message)
 		user_props[id] = UserProps{}
 	} else if msg.starts_with('http') {
+		println('${time.now()} ${id} ${msg}')
 		bot.send_message(chat_id: id, text: props.start_load_msg)
 		err := download_video(msg, props, user_props[id])
 		ans := if err.int() == 0 {
