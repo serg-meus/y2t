@@ -2,6 +2,15 @@
     "yt_dlp_path": "/root",
     "welcome_message": "Добро пожаловать! Я - бот, сохраняющий видео или аудио с видеосервисов. Кинь в меня ссылку, и я скачаю файл",
     "start_load_msg": "Скачиваю...",
-    "success_message": "Файл  сохранён. Ссылка:",
-    "yt_dlp_options": "-w -f 135+140 -o \"%(fulltitle)s_%(id)s.%(ext)s\" "
+    "success_message": "Файл сохранён. Ссылка:",
+    "yt_dlp_json": "/yt-dlp -j --restrict-filenames -f mp4 ",
+    "yt_dlp_options": "-w -f 135+140 -o \"%(fulltitle)s_%(id)s.%(ext)s\" ",
+    "turned_on": "Включен",
+    "turned_off": "Выключен",
+    "only_audio": "режим только аудио",
+    "not_realized": "Извините, пока не реализовано",
+    "already_downld": "Уже скачано",
+    "error": "Ошибка",
+    "update_limit": "100",
+    "downld_shutdown": "25"
 }

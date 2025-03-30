@@ -9,13 +9,21 @@ import dariotarantini.vgram { Bot, Update }
 
 struct Props {
 	yt_dlp_path     string @[required]
+	yt_dlp_json     string @[required]
 	welcome_message string @[required]
 	start_load_msg  string @[required]
 	success_message string @[required]
 	yt_dlp_options  string @[required]
-
+	error           string @[required]
+	turned_on       string @[required]
+	turned_off      string @[required]
+	only_audio      string @[required]
+	not_realized    string @[required]
+	already_downld  string @[required]
+	update_limit    int    @[required]
+	downld_shutdown int    @[required]
 mut:
-	server_ip       string
+	server_ip string
 }
 
 struct Secrets {
@@ -49,7 +57,7 @@ fn main() {
 	println('The bot started successfully')
 	mut just_started := true
 	for {
-		updates = bot.get_updates(offset: last_offset, limit: 100)
+		updates = bot.get_updates(offset: last_offset, limit: props.update_limit)
 		for update in updates {
 			if last_offset < update.update_id {
 				last_offset = update.update_id
@@ -70,30 +78,29 @@ fn react(bot Bot, update Update, props Props, mut user_props map[string]UserProp
 	if msg == '/start' {
 		bot.send_message(chat_id: id, text: props.welcome_message)
 		user_props[id] = UserProps{}
-	} else if msg.starts_with('http') {
+	} else if msg.starts_with('http') || msg.starts_with('www') {
 		println('${time.now()} ${id} ${msg}')
 		bot.send_message(chat_id: id, text: props.start_load_msg)
 		err := download_video(msg, props, user_props[id])
 		ans := if err.int() == 0 {
 			props.success_message + ' http://' + props.server_ip + '/' + err
 		} else {
-			'Ошибка ${err}'
+			props.error + ' ${err}'
 		}
 		bot.send_message(chat_id: id, text: ans)
 	} else if msg == '/ping' {
 		bot.send_message(chat_id: id, text: 'pong')
 	} else if msg == '/audio' {
 		user_props[id].audio = !user_props[id].audio
-		mode_tx := if user_props[id].audio { 'Включен' } else { 'Выключен' }
-		bot.send_message(chat_id: id, text: mode_tx + ' режим только аудио')
+		mode_tx := if user_props[id].audio { props.turned_on } else { props.turned_off }
+		bot.send_message(chat_id: id, text: mode_tx + ' ' + props.only_audio)
 	} else if msg.starts_with('/') {
-		bot.send_message(chat_id: id, text: 'Извините, пока не реализовано')
+		bot.send_message(chat_id: id, text: props.not_realized)
 	}
 }
 
 fn download_video(msg string, props Props, user_props UserProps) string {
-	cmd_get_json := props.yt_dlp_path + '/yt-dlp -j --restrict-filenames -f mp4 ' + msg +
-		' > tmp.json'
+	cmd_get_json := props.yt_dlp_path + props.yt_dlp_json + msg + ' > tmp.json'
 	os.execute_opt(cmd_get_json) or { return '404' }
 	lines := os.read_lines('tmp.json') or { return '2' }
 	video := json.decode(VideoProps, lines.join(' ')) or { return '3' }
@@ -113,9 +120,9 @@ fn download_video(msg string, props Props, user_props UserProps) string {
 		os.execute_opt(cmd_download) or { return '4' }
 		os.execute_opt('mv *' + video.id + '.' + ext + ' ' + new_filename) or { return '5' }
 	} else {
-		println('Уже скачано')
+		println(props.already_downld)
 	}
-	spawn serve(on: props.server_ip, shutdown_after: 25 * time.minute)
+	spawn serve(on: props.server_ip, shutdown_after: props.downld_shutdown * time.minute)
 	return new_filename
 }
 
