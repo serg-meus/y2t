@@ -88,6 +88,7 @@ fn react(bot Bot, update Update, props Props, mut user_props map[string]UserProp
 			props.error + ' ${err}'
 		}
 		bot.send_message(chat_id: id, text: ans)
+		gc_collect()
 	} else if msg == '/ping' {
 		bot.send_message(chat_id: id, text: 'pong')
 	} else if msg == '/audio' {
